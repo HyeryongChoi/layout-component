@@ -1,7 +1,8 @@
-import { ComponentPropsWithoutRef, MouseEventHandler, PropsWithChildren } from 'react';
+import { ComponentPropsWithoutRef, PropsWithChildren } from 'react';
 import { styled, css } from 'styled-components';
 import TabsProvider, { useTabsContext } from '../../context/TabsContext';
 import { Flex } from '../..';
+import { useTab } from '../../hooks/useTab';
 
 export type TabDirection = 'horizontal' | 'vertical';
 
@@ -59,16 +60,9 @@ interface TabProps extends ComponentPropsWithoutRef<'li'> {
 
 const Tab = (props: TabProps) => {
   const { tabPanelId, children, ...restProps } = props;
-  const { selectedTabId, changeTab, direction, primaryColor, backgroundColor } = useTabsContext();
+  const { anchorRef, onClickTab, onKeyDownEnterTab } = useTab();
+  const { selectedTabId, direction, primaryColor, backgroundColor } = useTabsContext();
   const isSelected = tabPanelId === selectedTabId.slice(0, -4); // '-tab'을 제외한 부분 추출
-
-  const onClickTab: MouseEventHandler<HTMLLIElement> = (event) => {
-    event.preventDefault();
-
-    changeTab(event.currentTarget.id);
-  };
-
-  console.log(backgroundColor);
 
   return (
     <TabWrapper
@@ -80,11 +74,14 @@ const Tab = (props: TabProps) => {
       direction={direction}
       selected={isSelected}
       onClick={onClickTab}
+      onKeyDown={onKeyDownEnterTab}
       primaryColor={primaryColor}
       backgroundColor={backgroundColor}
       {...restProps}
     >
-      <TabAnchor href={`#${tabPanelId}`}>{children}</TabAnchor>
+      <TabAnchor ref={anchorRef} href={`#${tabPanelId}`}>
+        {children}
+      </TabAnchor>
     </TabWrapper>
   );
 };
